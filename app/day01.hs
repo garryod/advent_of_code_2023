@@ -8,19 +8,16 @@ import System.IO (IOMode (ReadMode), hClose, hGetContents, openFile)
 
 main :: IO ()
 main = do
-  filename <- getArgs
   handle <- openFile "data/day01.txt" ReadMode
   contents <- hGetContents handle
-  let entries = lines contents
-  let calibrations = map extractCalibration entries
-  print (sum calibrations)
+  print (sum (map extractCalibration (lines contents)))
   hClose handle
 
 extractCalibration :: String -> Int
-extractCalibration entry = read [extractFirst entry, extractLast entry]
+extractCalibration entry = 10 * extractFirst entry + extractLast entry
 
-extractFirst :: String -> Char
-extractFirst entry = fromJust (find isDigit entry)
+extractFirst :: String -> Int
+extractFirst entry = digitToInt (fromJust (find isDigit entry))
 
-extractLast :: String -> Char
-extractLast entry = fromJust (find isDigit (reverse entry))
+extractLast :: String -> Int
+extractLast entry = digitToInt (fromJust (find isDigit (reverse entry)))
