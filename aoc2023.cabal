@@ -1,0 +1,19 @@
+cabal-version:      3.0
+name:               aoc2023
+version:            0.1.0.0
+synopsis:           Advent of code 2023
+
+license:            Apache-2.0
+license-file:       LICENSE
+author:             Garry O'Donnell
+maintainer:         garry.euan.odonnell@ntlworld.com
+
+extra-source-files: CHANGELOG.md
+
+executable day01
+  main-is:            day01.hs
+
+  build-depends:      base ^>=4.17.2.0
+  hs-source-dirs:     app
+  default-language:   Haskell2010
+
