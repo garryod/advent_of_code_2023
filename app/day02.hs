@@ -13,7 +13,16 @@ main = do
   contents <- hGetContents handle
   let bag = Draw 12 13 14
   print $ sum $ map gameId (filter (possibleGame bag) (map readGame $ lines contents))
+  print $ sum $ map ((power . minimumBag) . readGame) (lines contents)
   hClose handle
+
+power :: Draw -> Int
+power (Draw red green blue) = red * green * blue
+
+minimumBag :: Game -> Draw
+minimumBag (Game _ draws) = foldl update mempty draws
+  where
+    update bag draw = bag {red = max (red bag) (red draw), green = max (green bag) (green draw), blue = max (blue bag) (blue draw)}
 
 possibleGame :: Draw -> Game -> Bool
 possibleGame bag (Game _ draws) = all (possibleDraw bag) draws
