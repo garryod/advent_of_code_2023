@@ -1,7 +1,8 @@
 module Main where
 
 import qualified Data.Text as Text
-import System.IO (IOMode (ReadMode), hClose, hGetContents, openFile)
+import Data.Text.IO (hGetContents)
+import System.IO (IOMode (ReadMode), hClose, openFile)
 
 data Draw = Draw {red :: Int, green :: Int, blue :: Int} deriving (Show)
 
@@ -12,8 +13,8 @@ main = do
   handle <- openFile "data/day02.txt" ReadMode
   contents <- hGetContents handle
   let bag = Draw 12 13 14
-  print $ sum $ map gameId (filter (possibleGame bag) (map readGame $ lines contents))
-  print $ sum $ map ((power . minimumBag) . readGame) (lines contents)
+  print $ sum $ map gameId (filter (possibleGame bag) (map readGame $ Text.lines contents))
+  print $ sum $ map ((power . minimumBag) . readGame) (Text.lines contents)
   hClose handle
 
 power :: Draw -> Int
@@ -35,10 +36,10 @@ instance Semigroup Draw where
 instance Monoid Draw where
   mempty = Draw 0 0 0
 
-readGame :: String -> Game
+readGame :: Text.Text -> Game
 readGame input = Game {gameId = gameId, draws = draws}
   where
-    [gameText, drawsText] = Text.split (== ':') (Text.pack input)
+    [gameText, drawsText] = Text.split (== ':') input
     gameId = read . Text.unpack . last $ Text.words gameText
     draws = map draw $ Text.split (== ';') drawsText
     draw drawText = foldl update mempty (Text.split (== ',') drawText)
