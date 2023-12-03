@@ -17,3 +17,9 @@ executable day01
   hs-source-dirs:     app
   default-language:   Haskell2010
 
+executable day02
+  main-is:            day02.hs
+
+  build-depends:      base ^>=4.17.2.0, text ^>=2.0.2
+  hs-source-dirs:     app
+  default-language:   Haskell2010
