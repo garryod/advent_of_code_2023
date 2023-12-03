@@ -21,7 +21,7 @@ power :: Draw -> Int
 power (Draw red green blue) = red * green * blue
 
 minimumBag :: Game -> Draw
-minimumBag (Game _ draws) = foldl update mempty draws
+minimumBag (Game _ draws) = foldr update mempty draws
   where
     update bag draw = bag {red = max (red bag) (red draw), green = max (green bag) (green draw), blue = max (blue bag) (blue draw)}
 
@@ -42,8 +42,8 @@ readGame input = Game {gameId = gameId, draws = draws}
     [gameText, drawsText] = Text.split (== ':') input
     gameId = read . Text.unpack . last $ Text.words gameText
     draws = map draw $ Text.split (== ';') drawsText
-    draw drawText = foldl update mempty (Text.split (== ',') drawText)
-    update draw drawText = case color of
+    draw drawText = foldr update mempty (Text.split (== ',') drawText)
+    update drawText draw = case color of
       "red" -> draw {red = count}
       "green" -> draw {green = count}
       "blue" -> draw {blue = count}
