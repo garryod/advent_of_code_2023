@@ -11,17 +11,17 @@ main :: IO ()
 main = do
   handle <- openFile "data/day01.txt" ReadMode
   contents <- hGetContents handle
-  print (sum (map extractCalibration (lines contents)))
+  print ((sum . map extractCalibration . lines) contents)
   hClose handle
 
 extractCalibration :: String -> Int
-extractCalibration entry = 10 * fromJust (extractFirst entry) + fromJust (extractLast entry)
+extractCalibration entry = 10 * (fromJust . extractFirst) entry + (fromJust . extractLast) entry
 
 extractFirst :: String -> Maybe Int
-extractFirst entry = asum (map extractNumber (tails entry))
+extractFirst = asum . map extractNumber . tails
 
 extractLast :: String -> Maybe Int
-extractLast entry = asum (map extractNumber (reverse (tails entry)))
+extractLast = asum . map extractNumber . reverse . tails
 
 extractNumber :: String -> Maybe Int
 extractNumber substr
