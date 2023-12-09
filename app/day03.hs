@@ -5,30 +5,44 @@ import System.IO (IOMode (ReadMode), hClose, hGetContents, openFile)
 
 data Location = Location {row :: Int, column :: Int} deriving (Show)
 
+data Component = Component {location :: Location, symbol :: Char} deriving (Show)
+
 data Number = Number {start :: Location, chars :: Int, value :: Int} deriving (Show)
 
 main :: IO ()
 main = do
   handle <- openFile "data/day03.txt" ReadMode
   contents <- hGetContents handle
-  let partNumbers = filter (isPartNumber $ findComponents contents) (findNumbers contents)
-  let total = sum $ map value partNumbers
-  print total
+  let componentNumbers = map (associate $ findNumbers contents) (findComponents contents)
+  let partNumberTotal = sum $ map componentValue componentNumbers
+  print partNumberTotal
+  let gearTotal = sum $ map gearRatio $ filter isGear componentNumbers
+  print gearTotal
   hClose handle
 
-isPartNumber :: [Location] -> Number -> Bool
-isPartNumber components number = any (isNeighbour number) components
-  where
-    isNeighbour number component = row component >= (row . start) number - 1 && row component <= (row . start) number + 1 && column component >= (column . start) number - 1 && column component <= (column . start) number + chars number
+componentValue :: (Component, [Number]) -> Int
+componentValue (component, numbers) = sum $ map value numbers
 
-findComponents :: String -> [Location]
-findComponents input = fst $ foldl findColumns ([], 0) (lines input)
+isGear :: (Component, [Number]) -> Bool
+isGear (component, numbers) = (symbol component == '*') && (length numbers == 2)
+
+gearRatio :: (Component, [Number]) -> Int
+gearRatio (component, numbers) = product $ map value numbers
+
+associate :: [Number] -> Component -> (Component, [Number])
+associate numbers component = (component, filter (isRelated component) numbers)
   where
-    findColumns (columnsAcc, row) line = (columnsAcc ++ map (Location row) (fst (foldl findColumn ([], 0) line)), row + 1)
-    findColumn (columns, current) char
-      | isComponent char = (columns ++ [current], current + 1)
+    isRelated component number = (row . location) component >= (row . start) number - 1 && (row . location) component <= (row . start) number + 1 && (column . location) component >= (column . start) number - 1 && (column . location) component <= (column . start) number + chars number
+
+findComponents :: String -> [Component]
+findComponents input = fst $ foldl findComponents ([], 0) (lines input)
+  where
+    findComponents (columnsAcc, row) line = (columnsAcc ++ map (intoComponent row) (fst (foldl findComponent ([], 0) line)), row + 1)
+    findComponent (columns, current) char
+      | isComponent char = (columns ++ [(char, current)], current + 1)
       | otherwise = (columns, current + 1)
     isComponent char = char /= '.' && not (isNumber char)
+    intoComponent row (char, col) = Component (Location row col) char
 
 findNumbers :: String -> [Number]
 findNumbers input = fst $ foldl findNumbers ([], 0) (map (++ ['.']) (lines input))
