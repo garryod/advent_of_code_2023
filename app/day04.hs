@@ -12,14 +12,28 @@ main = do
   handle <- openFile "data/day04.txt" ReadMode
   contents <- hGetContents handle
   print (sum $ map cardPoints (readCards contents))
+  print (sum $ cardCounts (readCards contents))
   hClose handle
+
+cardCounts :: [Card] -> [Int]
+cardCounts cards = foldl cardCount [] [0 .. length cards - 1]
+  where
+    cardCount :: [Int] -> Int -> [Int]
+    cardCount counts cardIdx = counts ++ [foldl wonCards 1 (take cardIdx (zip [0 ..] cards))]
+      where
+        wonCards :: Int -> (Int, Card) -> Int
+        wonCards won (idx, card)
+          | cardIdx - idx <= numWinners card = won + counts !! idx
+          | otherwise = won
 
 cardPoints :: Card -> Int
 cardPoints card
-  | numWinners == 0 = 0
-  | otherwise = 2 ^ (numWinners - 1)
+  | numWinners card == 0 = 0
+  | otherwise = 2 ^ (numWinners card - 1)
+
+numWinners :: Card -> Int
+numWinners card = IntSet.size winningNumbers
   where
-    numWinners = IntSet.size winningNumbers
     winningNumbers = IntSet.intersection (selected card) (winning card)
 
 readCards :: Text.Text -> [Card]
