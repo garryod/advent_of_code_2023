@@ -14,6 +14,7 @@ main = do
   contents <- hGetContents handle
   let (seedText : mapsText) = Text.splitOn (Text.pack "\n\n") contents
   print (minimum $ map (followMaps (readMaps mapsText)) (readSeeds seedText))
+  print (minimum $ map (followMaps (readMaps mapsText)) (readSeedRanges seedText))
   hClose handle
 
 followMaps :: [RangeMap Int Int] -> Int -> Int
@@ -29,6 +30,15 @@ readSeeds :: Text.Text -> [Int]
 readSeeds input = map (read . Text.unpack) $ Text.words seedsText
   where
     [_, seedsText] = Text.split (== ':') input
+
+readSeedRanges :: Text.Text -> [Int]
+readSeedRanges input = concatMap rangeSeeds (pairs $ Text.words seedsText)
+  where
+    [_, seedsText] = Text.split (== ':') input
+    pairs [] = []
+    pairs elements = toTuple (take 2 elements) : pairs (drop 2 elements)
+    toTuple [a, b] = (a, b)
+    rangeSeeds (startSeed, numSeeds) = [read $ Text.unpack startSeed .. read (Text.unpack startSeed) + read (Text.unpack numSeeds) - 1]
 
 readMaps :: [Text.Text] -> [RangeMap Int Int]
 readMaps = map readMap
